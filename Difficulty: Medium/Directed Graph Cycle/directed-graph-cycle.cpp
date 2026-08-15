@@ -1,45 +1,55 @@
 class Solution {
   public:
+
+    bool dfs(int node, vector<vector<int>>& adj,
+             vector<int>& visited, vector<int>& path) {
+
+        visited[node] = 1;
+        path[node] = 1;
+
+        for (int neighbor : adj[node]) {
+
+            // Not visited
+            if (!visited[neighbor]) {
+                if (dfs(neighbor, adj, visited, path))
+                    return true;
+            }
+
+            // Already in current DFS path -> cycle
+            else if (path[neighbor]) {
+                return true;
+            }
+        }
+
+        // Remove from current recursion path
+        path[node] = 0;
+
+        return false;
+    }
+
     bool isCyclic(int V, vector<vector<int>> &edges) {
-        // code here
-         vector<int> adj[V];
 
-        for(auto it : edges){
-            adj[it[0]].push_back(it[1]);
+        vector<vector<int>> adj(V);
+
+        // Directed graph: only u -> v
+        for (auto &edge : edges) {
+            int u = edge[0];
+            int v = edge[1];
+
+            adj[u].push_back(v);
         }
 
-        queue<int> q;
-        int count=0;
-        vector<int> indegree(V, 0);
+        vector<int> visited(V, 0);
+        vector<int> path(V, 0);
 
-        for(int i = 0; i < V; i++){
-            for(auto it : adj[i]){
-                indegree[it]++;
+        // Handle disconnected graph
+        for (int i = 0; i < V; i++) {
+            if (!visited[i]) {
+                if (dfs(i, adj, visited, path))
+                    return true;
             }
         }
 
-        for(int i = 0; i < V; i++){
-            if(indegree[i] == 0){
-                q.push(i);
-            }
-        }
-
-        while(!q.empty()){
-            int node = q.front();
-            q.pop();
-
-            count++;
-            
-            for(auto it : adj[node]){
-                indegree[it]--;
-
-                if(indegree[it] == 0){
-                    q.push(it);
-                }
-            }
-        }
-        if(count==V) return false;
-
-        return true;
+        return false;
     }
 };
